@@ -132,7 +132,7 @@ const getInfo = async () => {
         hasSrcDir,
         prefix: pkg.sandbox.prefix,
         getUrl: () => {
-            return s3.getPublicUrlHttp(bucketName, `${pkg.sandbox.prefix}index.html`)
+            return `http://${bucketName}.s3-website.${_s3.config.region}.${pkg.sandbox.prefix||''}index.html`;
         }
     }
 };
