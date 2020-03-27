@@ -1,0 +1,24 @@
+{
+  "name": "@findaway/sandbox",
+  "version": "1.0.0",
+  "description": "Tool to manage sandboxed web apps",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Findaway",
+  "license": "ISC",
+  "dependencies": {
+    "@auth0/s3": "^1.0.0",
+    "aws-sdk": "^2.647.0",
+    "chalk": "^3.0.0",
+    "cli-progress": "^3.6.0",
+    "commander": "^5.0.0",
+    "git-branch": "^2.0.1",
+    "read-pkg": "^5.2.0",
+    "slugify": "^1.4.0"
+  },
+  "bin": {
+    "sandbox": "./index.js"
+  }
+}
