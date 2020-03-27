@@ -99,7 +99,7 @@ const removeBucket = async (bucketName) => {
             await _s3.deleteBucket({
                 Bucket: bucketName
             }).promise();
-            Promise.resolve();
+            console.log(green('Sandbox Removed!'));
         });
    } catch (e) {
        throw new Error(e);
@@ -132,9 +132,17 @@ const getInfo = async () => {
         hasSrcDir,
         prefix: pkg.sandbox.prefix,
         getUrl: () => {
-            return `http://${bucketName}.s3-website.${_s3.config.region}.${pkg.sandbox.prefix||''}index.html`;
+            return `http://${bucketName}.s3-website.${_s3.config.region}.amazonaws.com/${pkg.sandbox.prefix||''}`;
         }
     }
+};
+
+const logInfo = async () => {
+    let {baseBranchName, bucketName, getUrl} = await getInfo();
+    console.log(`Branch: ${blue(baseBranchName)}`);
+    console.log(`Bucket: ${blue(bucketName)}`);
+    console.log(`Region: ${blue(_s3.config.region)}`);
+    console.log(`URL: ${blue(getUrl())}`);
 };
 
 program
@@ -144,16 +152,11 @@ program
         try {
 
             let {baseBranchName, hasSrcDir, hasBucket, bucketName, getUrl} = await getInfo();
-
-            console.log(`Current Branch: ${blue(baseBranchName)}`);
-
             if (!hasBucket) {
-                console.log(blue(`Create Bucket: ${bucketName}`));
-                let data = await createBucket(bucketName);
+                await createBucket(bucketName);
             }
-
-            console.log(`Sandbox active: ${blue(getUrl())}`);
-
+            await logInfo();
+            console.log(green(`Sandbox Created!`));
         } catch (e) {
             console.log(red(e.message))
         }
@@ -209,7 +212,6 @@ program
                 throw new Error('Sandbox Not Created. Run `sandbox create`');
             }
             await removeBucket(bucketName);
-            console.log(green('Sandbox Removed!'));
         } catch (e) {
             console.log(red(e.message))
         }
@@ -219,12 +221,14 @@ program
     .command('info')
     .description('Get info about current branch sandbox')
     .action(async () => {
-        let {baseBranchName, hasSrcDir, hasBucket, bucketName, prefix, getUrl} = await getInfo();
-        console.log(`Branch: ${blue(baseBranchName)}`);
-        console.log(`Bucket: ${blue(bucketName)}`);
-        console.log(`Is Active?: ${hasBucket ? green('Yes') : red('No')}`);
-        if (hasBucket) {
-            console.log(`URL: ${getUrl()}`);
+        try {
+            let {baseBranchName, hasSrcDir, hasBucket, bucketName, prefix, getUrl} = await getInfo();
+            if (!hasBucket) {
+                throw new Error('Sandbox Not Created. Run `sandbox create`');
+            }
+            await logInfo();
+        } catch (e) {
+            console.log(red(e.message))
         }
     });
 

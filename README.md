@@ -38,9 +38,11 @@ Creates the S3 bucket, website, and Bucket Policy. This will use the current wor
 
 ```bash
 $ sandbox create
-Current Branch: current-branch-name
-Create Bucket: my-project-current-branch-name-sandbox
-Sandbox active: http://my-project-current-branch-name-sandbox.s3.amazonaws.com/optional/folder/prefix/index.html
+Branch: current-branch-name
+Bucket: my-project-current-branch-name-sandbox
+Region: your-aws-region
+URL: http://my-project-current-branch-name-sandbox.s3.amazonaws.com/optional/folder/prefix/index.html
+Sandbox Created!
 ```
 
 ### `deploy`
@@ -70,14 +72,12 @@ Display info about the current branch's sandbox.
 ```bash
 # No sandbox created.
 $ sandbox info
-Branch: txt-align-utils
-Bucket: gateway-txt-align-utils-sandbox
-Is Active?: No
+Sandbox Not Created. Run `sandbox create`
 
 # Sandbox created
 $ sandbox info
 Branch: current-branch-name
 Bucket: my-project-current-branch-name-sandbox
-Is Active?: Yes
-URL: http://my-project-current-branch-name-sandbox.s3.amazonaws.com/optional/folder/prefix/index.html
+Region: your-aws-region
+URL: http://my-project-current-branch-name-sandbox.s3-website.your-aws-region.amazonaws.com/optional/folder/prefix/index.html
 ```
