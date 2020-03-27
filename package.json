@@ -1,8 +1,10 @@
 {
-  "name": "@findaway/sandbox",
+  "name": "@findaway/sandbox-cli",
   "version": "1.0.0",
+  "private": false,
   "description": "Tool to manage sandboxed web apps",
   "main": "index.js",
+  "repository": "FindawayWorld/sandbox-cli",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
