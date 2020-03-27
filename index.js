@@ -106,11 +106,17 @@ const removeBucket = async (bucketName) => {
    }
 };
 
+slugify.extend({'.': '-'})
+const slugOpts = {
+    lower: true,
+    strict: true
+};
+
 const getInfo = async () => {
     let pkg = await readPkg();
     let baseBranchName = await branch();
-    let safeBranchName = slugify(baseBranchName);
-    let safeProjName = slugify(pkg.name);
+    let safeBranchName = slugify(baseBranchName, slugOpts);
+    let safeProjName = slugify(pkg.name, slugOpts);
     let bucketName = [safeProjName, safeBranchName, 'sandbox'].join('-');
     let srcDir = path.relative(process.cwd(), pkg.sandbox.srcDir);
     let hasBucket = await validateBucket(bucketName);
