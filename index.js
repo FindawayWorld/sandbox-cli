@@ -76,13 +76,18 @@ const removeBucket = async (bucketName) => {
         const deleter = client.deleteDir({
             Bucket: bucketName
         });
+        const deleteBar = new cliProgress.SingleBar({}, cliProgress.Presets.legacy);
+        deleteBar.start(deleter.progressTotal, 0);
         deleter.on('error', (err) => {
+            deleteBar.stop();
             console.error("unable to sync:", err.stack);
         });
         deleter.on('progress', () => {
-            console.log("progress", deleter.progressAmount, deleter.progressTotal);
+            deleteBar.setTotal(deleter.progressTotal);
+            deleteBar.update(deleter.progressAmount);
         });
         deleter.on('end', async () => {
+            deleteBar.stop();
             await _s3.deleteBucketWebsite({
                 Bucket: bucketName,
             }).promise();
@@ -176,13 +181,12 @@ program
                 console.error("unable to sync:", err.stack);
             });
             uploader.on('progress', function() {
-                // console.log("progress", uploader.progressAmount, uploader.progressTotal);
                 uploadBar.setTotal(uploader.progressTotal);
                 uploadBar.increment(uploader.progressAmount);
             });
             uploader.on('end', function() {
                 uploadBar.stop();
-                console.log("done uploading");
+                console.log(green('Sandbox Deployed!'));
             });
         } catch (e) {
             console.log(red(e.message))
@@ -199,6 +203,7 @@ program
                 throw new Error('Sandbox Not Created. Run `sandbox create`');
             }
             await removeBucket(bucketName);
+            console.log(green('Sandbox Removed!'));
         } catch (e) {
             console.log(red(e.message))
         }
