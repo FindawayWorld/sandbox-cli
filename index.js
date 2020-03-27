@@ -232,4 +232,6 @@ program
         }
     });
 
-program.parse(process.argv);
+program
+    .version(require('./package.json').version, '-v, --version')
+    .parse(process.argv);
