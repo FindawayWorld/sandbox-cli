@@ -9,7 +9,7 @@ const S3 = require('aws-sdk/clients/s3');
 const fs = require('fs');
 const path = require('path');
 const s3 = require('@auth0/s3');
-const cliProgress = require('cli-progress');
+const ora = require('ora');
 
 let _s3 = new S3();
 
@@ -76,18 +76,12 @@ const removeBucket = async (bucketName) => {
         const deleter = client.deleteDir({
             Bucket: bucketName
         });
-        const deleteBar = new cliProgress.SingleBar({}, cliProgress.Presets.legacy);
-        deleteBar.start(deleter.progressTotal, 0);
+        const spinner = ora('Deleting Sandbox').start();
         deleter.on('error', (err) => {
-            deleteBar.stop();
+            spinner.stop();
             console.error("unable to sync:", err.stack);
         });
-        deleter.on('progress', () => {
-            deleteBar.setTotal(deleter.progressTotal);
-            deleteBar.update(deleter.progressAmount);
-        });
         deleter.on('end', async () => {
-            deleteBar.stop();
             await _s3.deleteBucketWebsite({
                 Bucket: bucketName,
             }).promise();
@@ -99,6 +93,7 @@ const removeBucket = async (bucketName) => {
             await _s3.deleteBucket({
                 Bucket: bucketName
             }).promise();
+            spinner.stop();
             console.log(green('Sandbox Removed!'));
         });
    } catch (e) {
@@ -150,11 +145,14 @@ program
     .description('setup a sandbox for current branch')
     .action(async () => {
         try {
-
+            let spinner = ora('Checking Sandbox').start();
             let {baseBranchName, hasSrcDir, hasBucket, bucketName, getUrl} = await getInfo();
             if (!hasBucket) {
+                spinner.color = 'yellow';
+                spinner.text = 'Creating Sandbox';
                 await createBucket(bucketName);
             }
+            spinner.stop();
             await logInfo();
             console.log(green(`Sandbox Created!`));
         } catch (e) {
@@ -175,7 +173,7 @@ program
                 throw new Error('No Source Directory. Build your app and try again.');
             }
             const {srcDir} = await getInfo();
-            const uploadBar = new cliProgress.SingleBar({}, cliProgress.Presets.legacy);
+
             const uploader = client.uploadDir({
                 localDir: srcDir,
                 s3Params: {
@@ -184,17 +182,16 @@ program
                     ACL: 'public-read'
                 }
             });
-            uploadBar.start(uploader.progressTotal, 0);
+
+            const spinner = ora('Uploading Files').start();
+
             uploader.on('error', function(err) {
-                uploadBar.stop();
+                spinner.stop();
                 console.error("unable to sync:", err.stack);
             });
-            uploader.on('progress', function() {
-                uploadBar.setTotal(uploader.progressTotal);
-                uploadBar.increment(uploader.progressAmount);
-            });
+
             uploader.on('end', function() {
-                uploadBar.stop();
+                spinner.stop();
                 console.log(green('Sandbox Deployed!'));
             });
         } catch (e) {
