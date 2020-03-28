@@ -76,7 +76,7 @@ const removeBucket = async (bucketName) => {
         const deleter = client.deleteDir({
             Bucket: bucketName
         });
-        const spinner = ora('Deleting Sandbox').start();
+        const spinner = ora('Removing Sandbox').start();
         deleter.on('error', (err) => {
             spinner.stop();
             console.error("unable to sync:", err.stack);

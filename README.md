@@ -51,7 +51,7 @@ Sync files to S3. This will copy your `srcDir` files to the sandbox S3 bucket. I
 
 ```bash
 $ sandbox deploy
-progress [========================================] 100% | ETA: 0s | 281634799/2841169
+⠋ Uploading Files
 Sandbox Deployed!
 ```
 
@@ -61,7 +61,7 @@ Remove all uploaded files and delete the S3 Bucket.
 
 ```bash
 $ sandbox remove
-progress [========================================] 100% | ETA: 0s | 281634799/2841169
+⠋ Removing Sandbox
 Sandbox Removed!
 ```
 
