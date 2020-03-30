@@ -30,6 +30,24 @@ To use `sandbox` with your project you need to add some config values to your `p
 }
 ```
 
+## AWS config
+
+This tool assumes you have `~/.aws/config` and `~/.aws/credentials` setup.
+
+### config
+```ini
+[default]
+region=us-east-1
+output=json
+```
+
+### credentials
+```ini
+[default]
+aws_access_key_id=YOURAWSACCESSKEY
+aws_secret_access_key=YOURAWSSECRETACCESSKEY
+```
+
 ## Commands
 
 ### `create`
