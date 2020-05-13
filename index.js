@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 const { program } = require('commander');
-const {red, blue, green} = require('chalk');
+const { red, blue, green } = require('chalk');
 const branch = require('git-branch');
 const slugify = require('slugify');
 const readPkg = require('read-pkg');
@@ -19,25 +19,54 @@ let client = s3.createClient({
 
 const validateBucket = async (bucketName) => {
     try {
-        let data = await _s3.headBucket({
-            'Bucket': bucketName
-        }).promise();
+        let data = await _s3
+            .headBucket({
+                Bucket: bucketName
+            })
+            .promise();
         return data;
     } catch (e) {
         return false;
     }
 };
 
-const createBucket = async (bucketName) => {
+const listSandboxes = async () => {
     try {
-        await _s3.createBucket({
-            Bucket: bucketName,
-            ACL: 'public-read'
-        }).promise();
+        let allBuckets = await _s3.listBuckets().promise();
+        let list = allBuckets.Buckets.filter((bucket) => bucket.Name.includes('sandbox'));
+        for (let bucket of list) {
+            let tags = { TagSet: [] };
+            try {
+                tags = await _s3.getBucketTagging({ Bucket: bucket.Name }).promise();
+            } catch (err) {
+                tags = { TagSet: [] };
+            }
 
-        await _s3.putBucketPolicy({
-            Bucket: bucketName,
-            Policy: `{
+            bucket.tags = tags.TagSet.reduce((obj, tagset) => {
+                obj[tagset.Key] = tagset.Value;
+                return obj;
+            }, {});
+        }
+        return list;
+    } catch (err) {
+        console.error(err);
+        return false;
+    }
+};
+
+const createBucket = async (bucketName, projectName) => {
+    try {
+        await _s3
+            .createBucket({
+                Bucket: bucketName,
+                ACL: 'public-read'
+            })
+            .promise();
+
+        await _s3
+            .putBucketPolicy({
+                Bucket: bucketName,
+                Policy: `{
                 "Version": "2012-10-17",
                 "Statement": [
                     {
@@ -51,57 +80,84 @@ const createBucket = async (bucketName) => {
                     }
                 ]
             }`
-        }).promise();
+            })
+            .promise();
 
-        await _s3.putBucketWebsite({
-            Bucket: bucketName,
-            ContentMD5: '',
-            WebsiteConfiguration: {
-                ErrorDocument: {
-                    Key: 'index.html',
-                },
-                IndexDocument: {
-                    Suffix: 'index.html',
-                },
-            },
-        }).promise();
-
+        await _s3
+            .putBucketWebsite({
+                Bucket: bucketName,
+                ContentMD5: '',
+                WebsiteConfiguration: {
+                    ErrorDocument: {
+                        Key: 'index.html'
+                    },
+                    IndexDocument: {
+                        Suffix: 'index.html'
+                    }
+                }
+            })
+            .promise();
+        await _s3
+            .putBucketTagging({
+                Bucket: bucketName,
+                Tagging: {
+                    TagSet: [
+                        {
+                            Key: 'project',
+                            Value: projectName
+                        }
+                    ]
+                }
+            })
+            .promise();
     } catch (e) {
         throw new Error(e);
     }
 };
 
 const removeBucket = async (bucketName) => {
-   try {
+    try {
         const deleter = client.deleteDir({
             Bucket: bucketName
         });
         const spinner = ora('Removing Sandbox').start();
         deleter.on('error', (err) => {
             spinner.stop();
-            console.error("unable to sync:", err.stack);
+            console.error('unable to sync:', err.stack);
         });
         deleter.on('end', async () => {
-            await _s3.deleteBucketWebsite({
-                Bucket: bucketName,
-            }).promise();
+            await _s3
+                .deleteBucketWebsite({
+                    Bucket: bucketName
+                })
+                .promise();
 
-            await _s3.deleteBucketPolicy({
-                Bucket: bucketName,
-            }).promise();
+            await _s3
+                .deleteBucketPolicy({
+                    Bucket: bucketName
+                })
+                .promise();
 
-            await _s3.deleteBucket({
-                Bucket: bucketName
-            }).promise();
+            await _s3
+                .deleteBucketTagging({
+                    Bucket: bucketName
+                })
+                .promise();
+
+            await _s3
+                .deleteBucket({
+                    Bucket: bucketName
+                })
+                .promise();
             spinner.stop();
             console.log(green('Sandbox Removed!'));
         });
-   } catch (e) {
-       throw new Error(e);
-   }
+    } catch (e) {
+        throw new Error(e);
+    }
 };
 
-slugify.extend({'.': '-'})
+slugify.extend({ '.': '-' });
 const slugOpts = {
     lower: true,
     strict: true
@@ -120,6 +176,7 @@ const getInfo = async () => {
     return {
         baseBranchName,
         safeBranchName,
+        projectName: pkg.name,
         safeProjName,
         bucketName,
         srcDir,
@@ -127,13 +184,13 @@ const getInfo = async () => {
         hasSrcDir,
         prefix: pkg.sandbox.prefix,
         getUrl: () => {
-            return `http://${bucketName}.s3-website.${_s3.config.region}.amazonaws.com/${pkg.sandbox.prefix||''}`;
+            return `http://${bucketName}.s3-website.${_s3.config.region}.amazonaws.com/${pkg.sandbox.prefix || ''}`;
         }
-    }
+    };
 };
 
 const logInfo = async () => {
-    let {baseBranchName, bucketName, getUrl} = await getInfo();
+    let { baseBranchName, bucketName, getUrl } = await getInfo();
     console.log(`Branch: ${blue(baseBranchName)}`);
     console.log(`Bucket: ${blue(bucketName)}`);
     console.log(`Region: ${blue(_s3.config.region)}`);
@@ -146,17 +203,17 @@ program
     .action(async () => {
         try {
             let spinner = ora('Checking Sandbox').start();
-            let {baseBranchName, hasSrcDir, hasBucket, bucketName, getUrl} = await getInfo();
+            let { baseBranchName, hasSrcDir, hasBucket, bucketName, getUrl, projectName } = await getInfo();
             if (!hasBucket) {
                 spinner.color = 'yellow';
                 spinner.text = 'Creating Sandbox';
-                await createBucket(bucketName);
+                await createBucket(bucketName, projectName);
             }
             spinner.stop();
             await logInfo();
             console.log(green(`Sandbox Created!`));
         } catch (e) {
-            console.log(red(e.message))
+            console.log(red(e.message));
         }
     });
 
@@ -165,14 +222,14 @@ program
     .description('deploy built application to sandbox')
     .action(async () => {
         try {
-            let {baseBranchName, hasSrcDir, hasBucket, bucketName, prefix} = await getInfo();
+            let { baseBranchName, hasSrcDir, hasBucket, bucketName, prefix } = await getInfo();
             if (!hasBucket) {
                 throw new Error('Sandbox Not Created. Run `sandbox create`');
             }
             if (!hasSrcDir) {
                 throw new Error('No Source Directory. Build your app and try again.');
             }
-            const {srcDir} = await getInfo();
+            const { srcDir } = await getInfo();
 
             const uploader = client.uploadDir({
                 localDir: srcDir,
@@ -185,17 +242,17 @@ program
 
             const spinner = ora('Uploading Files').start();
 
-            uploader.on('error', function(err) {
+            uploader.on('error', function (err) {
                 spinner.stop();
-                console.error("unable to sync:", err.stack);
+                console.error('unable to sync:', err.stack);
             });
 
-            uploader.on('end', function() {
+            uploader.on('end', function () {
                 spinner.stop();
                 console.log(green('Sandbox Deployed!'));
             });
         } catch (e) {
-            console.log(red(e.message))
+            console.log(red(e.message));
         }
     });
 
@@ -204,13 +261,42 @@ program
     .description('remove deployed sandbox')
     .action(async () => {
         try {
-            let {baseBranchName, hasSrcDir, hasBucket, bucketName} = await getInfo();
+            let { baseBranchName, hasSrcDir, hasBucket, bucketName } = await getInfo();
             if (!hasBucket) {
                 throw new Error('Sandbox Not Created. Run `sandbox create`');
             }
             await removeBucket(bucketName);
         } catch (e) {
-            console.log(red(e.message))
+            console.log(red(e.message));
+        }
+    });
+
+program
+    .command('ls')
+    .description('list active sandboxes')
+    .action(async () => {
+        try {
+            let spinner = ora('Listing Sandboxes').start();
+            let list = await listSandboxes();
+            if (!list.length) {
+                console.log(red('No Active Sandboxes'));
+                return;
+            }
+            let groups = list.reduce((obj, bucket) => {
+                let group = bucket.tags.project || 'unknown';
+                if (!obj[group]) obj[group] = [];
+                obj[group].push(bucket.Name.replace('-sandbox', ''));
+                return obj;
+            }, {});
+            spinner.stop();
+            console.log('\n');
+            Object.keys(groups).forEach((group) => {
+                console.log(green(group));
+                groups[group].forEach((bucket) => console.log('  ' + blue(bucket)));
+                console.log('\n');
+            });
+        } catch (e) {
+            console.log(red(e.message));
         }
     });
 
@@ -219,16 +305,14 @@ program
     .description('Get info about current branch sandbox')
     .action(async () => {
         try {
-            let {baseBranchName, hasSrcDir, hasBucket, bucketName, prefix, getUrl} = await getInfo();
+            let { baseBranchName, hasSrcDir, hasBucket, bucketName, prefix, getUrl } = await getInfo();
             if (!hasBucket) {
                 throw new Error('Sandbox Not Created. Run `sandbox create`');
             }
             await logInfo();
         } catch (e) {
-            console.log(red(e.message))
+            console.log(red(e.message));
         }
     });
 
-program
-    .version(require('./package.json').version, '-v, --version')
-    .parse(process.argv);
+program.version(require('./package.json').version, '-v, --version').parse(process.argv);
