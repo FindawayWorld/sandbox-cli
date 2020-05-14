@@ -18,8 +18,8 @@ npm install -g @findaway/sandbox-cli
 
 To use `sandbox` with your project you need to add some config values to your `package.json`
 
-- `srcDir` - This is the directory of files to deploy to your sandbox.
-- `prefix` - (optional) Directory to place files in S3 bucket.
+-   `srcDir` - This is the directory of files to deploy to your sandbox.
+-   `prefix` - (optional) Directory to place files in S3 bucket.
 
 ```json
 {
@@ -35,6 +35,7 @@ To use `sandbox` with your project you need to add some config values to your `p
 This tool assumes you have `~/.aws/config` and `~/.aws/credentials` setup.
 
 ### config
+
 ```ini
 [default]
 region=us-east-1
@@ -42,6 +43,7 @@ output=json
 ```
 
 ### credentials
+
 ```ini
 [default]
 aws_access_key_id=YOURAWSACCESSKEY
@@ -98,4 +100,20 @@ Branch: current-branch-name
 Bucket: my-project-current-branch-name-sandbox
 Region: your-aws-region
 URL: http://my-project-current-branch-name-sandbox.s3-website.your-aws-region.amazonaws.com/optional/folder/prefix/index.html
+```
+
+### `ls`
+
+List all active/created sandboxes.
+
+```bash
+# No sandbox created.
+$ sandbox ls
+⠋ Listing Sandboxes
+
+my-project
+  current-branch-name
+
+another-project
+  another-branch-name
 ```
