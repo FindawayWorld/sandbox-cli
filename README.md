@@ -75,13 +75,13 @@ $ sandbox deploy
 Sandbox Deployed!
 ```
 
-### `remove [repo] [branch]`
+### `remove [name] [branch]`
 
 Remove all uploaded files and delete the S3 Bucket. Arguments can be passed to remove a sandbox globally.
 
 #### Arguments
 
--   `repo` - Optional. Name of the repo, from `package.json`.
+-   `name` - Optional. Name of the name, from `package.json`.
 -   `branch` - Optional. Name of Git branch.
 
 ```bash
@@ -94,13 +94,13 @@ $ sandbox remove another-project another-branch-name
 Sandbox Removed!
 ```
 
-### `info [repo] [branch]`
+### `info [name] [branch]`
 
 Display info about the current branch's sandbox. Arguments can be passed to look up sandbox information globally.
 
 #### Arguments
 
--   `repo` - Optional. Name of the repo, from `package.json`.
+-   `name` - Optional. Name of the name, from `package.json`.
 -   `branch` - Optional. Name of Git branch.
 
 ```bash
