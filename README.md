@@ -61,7 +61,7 @@ $ sandbox create
 Branch: current-branch-name
 Bucket: my-project-current-branch-name-sandbox
 Region: your-aws-region
-URL: http://my-project-current-branch-name-sandbox.s3.amazonaws.com/optional/folder/prefix/index.html
+URL: http://my-project-current-branch-name-sandbox.s3.amazonaws.com/optional/folder/prefix/
 Sandbox Created!
 ```
 
@@ -113,14 +113,14 @@ $ sandbox info
 Branch: current-branch-name
 Bucket: my-project-current-branch-name-sandbox
 Region: your-aws-region
-URL: http://my-project-current-branch-name-sandbox.s3-website.your-aws-region.amazonaws.com/optional/folder/prefix/index.html
+URL: http://my-project-current-branch-name-sandbox.s3-website.your-aws-region.amazonaws.com/optional/folder/prefix/
 
 # Sandbox created
 $ sandbox info another-project another-branch-name
 Branch: another-branch-name
 Bucket: another-project-another-branch-name-sandbox
 Region: your-aws-region
-URL: http://my-project-another-branch-name-sandbox.s3-website.your-aws-region.amazonaws.com/optional/folder/prefix/index.html
+URL: http://my-project-another-branch-name-sandbox.s3-website.your-aws-region.amazonaws.com/optional/folder/prefix/
 ```
 
 ### `ls`
