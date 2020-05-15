@@ -75,19 +75,33 @@ $ sandbox deploy
 Sandbox Deployed!
 ```
 
-### `remove`
+### `remove [repo] [branch]`
 
-Remove all uploaded files and delete the S3 Bucket.
+Remove all uploaded files and delete the S3 Bucket. Arguments can be passed to remove a sandbox globally.
+
+#### Arguments
+
+-   `repo` - Optional. Name of the repo, from `package.json`.
+-   `branch` - Optional. Name of Git branch.
 
 ```bash
 $ sandbox remove
 ⠋ Removing Sandbox
 Sandbox Removed!
+
+$ sandbox remove another-project another-branch-name
+⠋ Removing Sandbox
+Sandbox Removed!
 ```
 
-### `info`
+### `info [repo] [branch]`
 
-Display info about the current branch's sandbox.
+Display info about the current branch's sandbox. Arguments can be passed to look up sandbox information globally.
+
+#### Arguments
+
+-   `repo` - Optional. Name of the repo, from `package.json`.
+-   `branch` - Optional. Name of Git branch.
 
 ```bash
 # No sandbox created.
@@ -100,6 +114,13 @@ Branch: current-branch-name
 Bucket: my-project-current-branch-name-sandbox
 Region: your-aws-region
 URL: http://my-project-current-branch-name-sandbox.s3-website.your-aws-region.amazonaws.com/optional/folder/prefix/index.html
+
+# Sandbox created
+$ sandbox info another-project another-branch-name
+Branch: another-branch-name
+Bucket: another-project-another-branch-name-sandbox
+Region: your-aws-region
+URL: http://my-project-another-branch-name-sandbox.s3-website.your-aws-region.amazonaws.com/optional/folder/prefix/index.html
 ```
 
 ### `ls`
