@@ -163,13 +163,14 @@ const slugOpts = {
     strict: true
 };
 
-const getInfo = async () => {
-    let pkg = await readPkg();
-    let baseBranchName = await branch();
+const getInfo = async (repo, branchName) => {
+    let pkg = (await readPkg()) || { name: repo, sandbox: { srcDir: '', prefix: '' } };
+    let sandboxSettings = pkg.sandbox || { srcDir: '', prefix: '' };
+    let baseBranchName = branchName || (await branch());
     let safeBranchName = slugify(baseBranchName, slugOpts);
-    let safeProjName = slugify(pkg.name, slugOpts);
+    let safeProjName = slugify(repo || pkg.name, slugOpts);
     let bucketName = [safeProjName, safeBranchName, 'sandbox'].join('-');
-    let srcDir = path.relative(process.cwd(), pkg.sandbox.srcDir);
+    let srcDir = path.relative(process.cwd(), sandboxSettings.srcDir);
     let hasBucket = await validateBucket(bucketName);
     let hasSrcDir = fs.existsSync(srcDir);
 
@@ -182,15 +183,15 @@ const getInfo = async () => {
         srcDir,
         hasBucket,
         hasSrcDir,
-        prefix: pkg.sandbox.prefix,
+        prefix: sandboxSettings.prefix,
         getUrl: () => {
-            return `http://${bucketName}.s3-website.${_s3.config.region}.amazonaws.com/${pkg.sandbox.prefix || ''}`;
+            return `http://${bucketName}.s3-website.${_s3.config.region}.amazonaws.com/${sandboxSettings.prefix || ''}`;
         }
     };
 };
 
-const logInfo = async () => {
-    let { baseBranchName, bucketName, getUrl } = await getInfo();
+const logInfo = async (repo, branchName) => {
+    let { baseBranchName, bucketName, getUrl } = await getInfo(repo, branchName);
     console.log(`Branch: ${blue(baseBranchName)}`);
     console.log(`Bucket: ${blue(bucketName)}`);
     console.log(`Region: ${blue(_s3.config.region)}`);
@@ -257,11 +258,11 @@ program
     });
 
 program
-    .command('remove')
+    .command('remove [repo] [branchName]')
     .description('remove deployed sandbox')
-    .action(async () => {
+    .action(async (repo, branchName) => {
         try {
-            let { baseBranchName, hasSrcDir, hasBucket, bucketName } = await getInfo();
+            let { baseBranchName, hasSrcDir, hasBucket, bucketName } = await getInfo(repo, branchName);
             if (!hasBucket) {
                 throw new Error('Sandbox Not Created. Run `sandbox create`');
             }
@@ -285,7 +286,7 @@ program
             let groups = list.reduce((obj, bucket) => {
                 let group = bucket.tags.project || 'unknown';
                 if (!obj[group]) obj[group] = [];
-                obj[group].push(bucket.Name.replace('-sandbox', ''));
+                obj[group].push(bucket.Name.replace('-sandbox', '').replace(slugify(group) + '-', ''));
                 return obj;
             }, {});
             spinner.stop();
@@ -301,15 +302,15 @@ program
     });
 
 program
-    .command('info')
+    .command('info [repo] [branchName]')
     .description('Get info about current branch sandbox')
-    .action(async () => {
+    .action(async (repo, branchName) => {
         try {
-            let { baseBranchName, hasSrcDir, hasBucket, bucketName, prefix, getUrl } = await getInfo();
+            let { baseBranchName, hasSrcDir, hasBucket, bucketName, prefix, getUrl } = await getInfo(repo, branchName);
             if (!hasBucket) {
                 throw new Error('Sandbox Not Created. Run `sandbox create`');
             }
-            await logInfo();
+            await logInfo(repo, branchName);
         } catch (e) {
             console.log(red(e.message));
         }
