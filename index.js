@@ -163,14 +163,27 @@ const slugOpts = {
     strict: true
 };
 
+// S3 limits the max length of a bucket name to 63 chars.
+// This will format the name to account for that limit.
+const formatBucketName = (projName, branchName) => {
+    let formattedName = [projName, branchName, 'sandbox'].join('-');
+    if (formattedName.length <= 63) {
+        // If our bucket name is <= 63 chars use it.
+        return formattedName;
+    }
+    let remainingChars = 63 - (projName.length + 'sandbox'.length);
+    let shortBranchName = branchName.substr(0, remainingChars - 3);
+    return [projName, shortBranchName, 'sandbox'].join('-');
+};
+
 const getInfo = async (repo, branchName) => {
     let pkg = (await readPkg()) || { name: repo, sandbox: { srcDir: '', prefix: '' } };
     let sandboxSettings = pkg.sandbox || { srcDir: '', prefix: '' };
     let baseBranchName = branchName || (await branch());
     let safeBranchName = slugify(baseBranchName, slugOpts);
     let safeProjName = slugify(repo || pkg.name, slugOpts);
-    let bucketName = [safeProjName, safeBranchName, 'sandbox'].join('-');
-    let srcDir = path.relative(process.cwd(), sandboxSettings.srcDir);
+    let bucketName = formatBucketName(safeProjName, safeBranchName);
+    let srcDir = sandboxSettings.srcDir === '.' ? process.cwd() : path.relative(process.cwd(), sandboxSettings.srcDir);
     let hasBucket = await validateBucket(bucketName);
     let hasSrcDir = fs.existsSync(srcDir);
 
