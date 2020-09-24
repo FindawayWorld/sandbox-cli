@@ -177,7 +177,13 @@ const formatBucketName = (projName, branchName) => {
 };
 
 const getInfo = async (repo, branchName) => {
-    let pkg = (await readPkg()) || { name: repo, sandbox: { srcDir: '', prefix: '' } };
+    let pkg = { name: repo, sandbox: { srcDir: '', prefix: '' } };
+    try {
+        pkg = await readPkg();
+    } catch (e) {
+        pkg = pkg;
+    }
+
     let sandboxSettings = pkg.sandbox || { srcDir: '', prefix: '' };
     let baseBranchName = branchName || (await branch());
     let safeBranchName = slugify(baseBranchName, slugOpts);
@@ -320,6 +326,16 @@ program
     .action(async (repo, branchName) => {
         try {
             let { baseBranchName, hasSrcDir, hasBucket, bucketName, prefix, getUrl } = await getInfo(repo, branchName);
+            if (process.env.CI) {
+                return {
+                    baseBranchName,
+                    hasSrcDir,
+                    hasBucket,
+                    bucketName,
+                    prefix,
+                    url: getUrl()
+                };
+            }
             if (!hasBucket) {
                 throw new Error('Sandbox Not Created. Run `sandbox create`');
             }
