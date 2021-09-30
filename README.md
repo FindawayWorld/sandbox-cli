@@ -18,8 +18,8 @@ npm install -g @findaway/sandbox-cli
 
 To use `sandbox` with your project you need to add some config values to your `package.json`
 
--   `srcDir` - This is the directory of files to deploy to your sandbox.
--   `prefix` - (optional) Directory to place files in S3 bucket.
+- `srcDir` - This is the directory of files to deploy to your sandbox.
+- `prefix` - (optional) Directory to place files in S3 bucket.
 
 ```json
 {
@@ -75,14 +75,14 @@ $ sandbox deploy
 Sandbox Deployed!
 ```
 
-### `remove [name] [branch]`
+### `remove | rm [name] [branch]`
 
 Remove all uploaded files and delete the S3 Bucket. Arguments can be passed to remove a sandbox globally.
 
 #### Arguments
 
--   `name` - Optional. Name of the name, from `package.json`.
--   `branch` - Optional. Name of Git branch.
+- `name` - Optional. Name of the name, from `package.json`.
+- `branch` - Optional. Name of Git branch.
 
 ```bash
 $ sandbox remove
@@ -100,8 +100,8 @@ Display info about the current branch's sandbox. Arguments can be passed to look
 
 #### Arguments
 
--   `name` - Optional. Name of the name, from `package.json`.
--   `branch` - Optional. Name of Git branch.
+- `name` - Optional. Name of the name, from `package.json`.
+- `branch` - Optional. Name of Git branch.
 
 ```bash
 # No sandbox created.
@@ -123,7 +123,7 @@ Region: your-aws-region
 URL: http://my-project-another-branch-name-sandbox.s3-website.your-aws-region.amazonaws.com/optional/folder/prefix/
 ```
 
-### `ls`
+### `list | ls`
 
 List all active/created sandboxes.
 
@@ -137,4 +137,13 @@ my-project
 
 another-project
   another-branch-name
+```
+
+### `open [repo] [branch]`
+
+Open the sandbox URL in a browser.
+
+```bash
+# No sandbox created.
+$ sandbox open
 ```
