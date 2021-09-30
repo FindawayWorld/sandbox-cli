@@ -12,15 +12,20 @@
   "license": "ISC",
   "dependencies": {
     "@auth0/s3": "^1.0.0",
-    "aws-sdk": "^2.647.0",
-    "chalk": "^3.0.0",
-    "commander": "^5.0.0",
+    "aws-sdk": "^2.997.0",
+    "chalk": "^4.1.2",
+    "commander": "^8.2.0",
     "git-branch": "^2.0.1",
+    "open": "^8.2.1",
     "ora": "^4.0.3",
-    "read-pkg": "^5.2.0",
-    "slugify": "^1.4.0"
+    "read-pkg": "5.2.0",
+    "slugify": "^1.6.0"
   },
   "bin": {
     "sandbox": "./index.js"
-  }
+  },
+  "devDependencies": {
+    "@findaway/prettier-config": "^1.0.0"
+  },
+  "prettier": "@findaway/prettier-config"
 }

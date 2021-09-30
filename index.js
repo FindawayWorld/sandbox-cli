@@ -10,6 +10,7 @@ const fs = require('fs');
 const path = require('path');
 const s3 = require('@auth0/s3');
 const ora = require('ora');
+const open = require('open');
 
 let _s3 = new S3();
 
@@ -278,6 +279,7 @@ program
 
 program
     .command('remove [repo] [branchName]')
+    .alias('rm')
     .description('remove deployed sandbox')
     .action(async (repo, branchName) => {
         try {
@@ -292,7 +294,8 @@ program
     });
 
 program
-    .command('ls')
+    .command('list')
+    .alias('ls')
     .description('list active sandboxes')
     .action(async () => {
         try {
@@ -340,6 +343,22 @@ program
                 throw new Error('Sandbox Not Created. Run `sandbox create`');
             }
             await logInfo(repo, branchName);
+        } catch (e) {
+            console.log(red(e.message));
+        }
+    });
+
+program
+    .command('open [repo] [branchName]')
+    .description('Open the sandbox URL in your browser.')
+    .action(async (repo, branchName) => {
+        try {
+            let { hasBucket, getUrl } = await getInfo(repo, branchName);
+            let url = getUrl();
+            if (!hasBucket) {
+                throw new Error('Sandbox Not Created. Run `sandbox create`');
+            }
+            await open(url);
         } catch (e) {
             console.log(red(e.message));
         }
