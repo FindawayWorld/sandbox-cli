@@ -2,7 +2,6 @@
 
 const { program } = require('commander');
 const { red, blue, green } = require('chalk');
-const branch = require('git-branch');
 const slugify = require('slugify');
 const readPkg = require('read-pkg');
 const S3 = require('aws-sdk/clients/s3');
@@ -11,6 +10,7 @@ const path = require('path');
 const s3 = require('@auth0/s3');
 const ora = require('ora');
 const open = require('open');
+const { branch } = require('./utils/git');
 
 let _s3 = new S3();
 
