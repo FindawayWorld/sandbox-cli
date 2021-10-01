@@ -1,6 +1,6 @@
 {
   "name": "@findaway/sandbox-cli",
-  "version": "2.1.1",
+  "version": "2.2.1",
   "private": false,
   "description": "Tool to manage sandboxed web apps",
   "main": "index.js",
@@ -15,7 +15,6 @@
     "aws-sdk": "^2.997.0",
     "chalk": "^4.1.2",
     "commander": "^8.2.0",
-    "git-branch": "^2.0.1",
     "open": "^8.2.1",
     "ora": "^4.0.3",
     "read-pkg": "5.2.0",
@@ -27,5 +26,10 @@
   "devDependencies": {
     "@findaway/prettier-config": "^1.0.0"
   },
+  "files": [
+    "bin/",
+    "utils/",
+    "*.js"
+  ],
   "prettier": "@findaway/prettier-config"
 }
